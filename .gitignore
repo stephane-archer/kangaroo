@@ -1,0 +1,6 @@
+# Ignore the build files
+kangaroo
+
+# Ignore mac os files
+.DS_Store
+Icon
