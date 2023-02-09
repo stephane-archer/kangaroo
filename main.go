@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -10,6 +11,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path"
 	"strings"
 )
 
@@ -22,8 +24,30 @@ func loadConfig(configPath string) *ini.File {
 	return cfg
 }
 
+func pathExist(path string) bool {
+	_, err := os.Stat(path)
+	return !errors.Is(err, os.ErrNotExist)
+}
+
+func findConfigFile() string {
+	const defaultPath string = "./config.ini"
+	if pathExist(defaultPath) {
+		return defaultPath
+	}
+
+	// for Mac OS .app
+	executablePath, err := os.Executable()
+	if err != nil {
+		log.Fatal(err)
+	}
+	executatbleDir := path.Dir(executablePath)
+	resoucesDir := path.Join(executatbleDir, "../", "Resources/")
+	return path.Join(resoucesDir, "config.ini")
+}
+
 func main() {
-	cfg := loadConfig("config.ini")
+	configFile := findConfigFile()
+	cfg := loadConfig(configFile)
 	windowName := cfg.Section("").Key("WindowName").String()
 	a := app.New()
 	w := a.NewWindow(windowName)
